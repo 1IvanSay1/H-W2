@@ -6,7 +6,13 @@ def create_db(conn):
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(40) NOT NULL,
                     surname VARCHAR(60) NOT NULL,
-                    email TEXT NOT NULL,
+                    email TEXT NOT NULL
+                );
+                ''')
+    conn.execute('''
+                CREATE TABLE IF  NOT EXISTS phones(
+                    id SERIAL PRIMARY KEY,
+                    client_id integer references Client(id),
                     number INTEGER
                 );
                 ''')
@@ -23,7 +29,7 @@ def add_phone(conn, client_id, phone):
                 VALUES(client_id, phone);
                 ''')
 
-def change_client(conn, client_id, first_name=None, last_name=None, email=None, phones=None):
+def change_client(conn, client_id, first_name, last_name, email, phones):
     conn.execute('''
                 UPDATE client
                 SET name = first_name, surname = last_name, email = email, number = phones
@@ -42,13 +48,32 @@ def delete_client(conn, client_id):
                 ''')
 
 def find_client(conn, first_name=None, last_name=None, email=None, phone=None):
-    conn.execute('''
-                SELECT name, surname, email, number FROM client
-                WHERE name like first_name, surname like last_name, email like email, number like phone;
-                ''')
-
+    if first_name:
+        conn.execute('''
+                    SELECT name FROM client
+                    WHERE name like first_name;
+                    ''')
+    elif last_name:
+        conn.execute('''
+                    SELECT surname FROM client
+                    WHERE surname like last_name;
+                    ''')
+    elif email:
+        conn.execute('''
+                    SELECT email FROM client
+                    WHERE email like email;
+                    ''')
+    elif phone:
+        conn.execute('''
+                    SELECT number FROM phones
+                    WHERE number like phone;
+                    ''')
+    else:
+        None
 
 with psycopg2.connect(database="clients_db", user="postgres", password="postgres") as conn:
-    print(create_db())
-
+    pass
 conn.close()
+
+if __name__ == "__main__":
+    print(create_db())
