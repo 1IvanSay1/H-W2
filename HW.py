@@ -29,12 +29,13 @@ def add_phone(conn, client_id, phone):
                 VALUES(client_id, phone);
                 ''')
 
-def change_client(conn, client_id, first_name, last_name, email, phones):
-    conn.execute('''
-                UPDATE client
-                SET name = first_name, surname = last_name, email = email, number = phones
-                WHERE id = client_id;
-                ''')
+def change_client(conn, client_id, **kwargs):
+    for key, value in kwargs.items():
+        conn.execute(f'''
+                     UPDATE client
+                     SET {key} = {value}
+                     WHERE id = client_id;
+                     ''')
 
 def delete_phone(conn, client_id, phone):
     conn.execute('''
@@ -44,32 +45,20 @@ def delete_phone(conn, client_id, phone):
 
 def delete_client(conn, client_id):
     conn.execute('''
-                DELETE FROM clients;
+                DELETE FROM phones
+                WHERE client_id = client_id;
+                ''')
+    conn.execute('''
+                DELETE FROM clients
+                WHERE id = client_id;
                 ''')
 
-def find_client(conn, first_name=None, last_name=None, email=None, phone=None):
-    if first_name:
-        conn.execute('''
-                    SELECT name FROM client
-                    WHERE name like first_name;
-                    ''')
-    elif last_name:
-        conn.execute('''
-                    SELECT surname FROM client
-                    WHERE surname like last_name;
-                    ''')
-    elif email:
-        conn.execute('''
-                    SELECT email FROM client
-                    WHERE email like email;
-                    ''')
-    elif phone:
-        conn.execute('''
-                    SELECT number FROM phones
-                    WHERE number like phone;
-                    ''')
-    else:
-        None
+def find_client(conn, **kwargs):
+    for key, value in kwargs.items():
+        conn.execute(f'''
+                     SELECT {key} FROM client
+                     WHERE {key} like {value};
+                     ''')
 
 with psycopg2.connect(database="clients_db", user="postgres", password="postgres") as conn:
     pass
